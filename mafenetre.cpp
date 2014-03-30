@@ -9,11 +9,18 @@
 #include <temps.h>
 #include <cmath>
 
-MaFenetre::MaFenetre() : QWidget()
+MaFenetre::MaFenetre(int rows, int cols) : QWidget()
 {
+    this->rows = rows;
+    this->cols = cols;
+
+    this->tabVal = new Unite** [rows];
+    for(int i = 0; i < rows; i += 1)
+        tabVal[i] = new Unite* [cols];
+
     setFixedSize(1024, 768);
-    for(int i = 0; i < 5; i += 1){
-        for(int j = 0; j < 3; j += 1){
+    for(int i = 0; i < rows; i += 1){
+        for(int j = 0; j < cols; j += 1){
             tabVal[i][j] = NULL;
         }
     }
@@ -55,11 +62,8 @@ MaFenetre::MaFenetre() : QWidget()
     input_echelle = new QSpinBox();
     input_echelle->setRange(-3, 3);
     combo_ligne = new QComboBox();
-    combo_ligne->addItem("1");
-    combo_ligne->addItem("2");
-    combo_ligne->addItem("3");
-    combo_ligne->addItem("4");
-    combo_ligne->addItem("5");
+    for (int i = 0; i < rows; i += 1)
+        combo_ligne->addItem(QString::number(i + 1));
     combo_unite = new QComboBox();
     combo_unite->addItem("Longueur");
     combo_unite->addItem("Poids");
@@ -97,14 +101,12 @@ MaFenetre::MaFenetre() : QWidget()
     /*
      * Table
      */
-    int rows = 5;
-    int cols = 3;
     table = new QTableWidget(rows, cols);
     table->setHorizontalHeaderItem(0, new QTableWidgetItem("Longueur"));
     table->setHorizontalHeaderItem(1, new QTableWidgetItem("Poids"));
     table->setHorizontalHeaderItem(2, new QTableWidgetItem("Temps"));
-    for(int r = 0; r < rows; r+=1){
-        for(int c = 0; c < cols; c+=1) {
+    for(int r = 0; r < rows; r += 1){
+        for(int c = 0; c < cols; c += 1) {
             QTableWidgetItem *item;
             item = new QTableWidgetItem();
             table->setItem(r,c,item);
@@ -160,25 +162,54 @@ void MaFenetre::ajouter()
     default:
         break;
     }
+    total();
 }
 
 void MaFenetre::total()
 {
     double s_longueurs = 0.0, s_poids = 0.0, s_temps = 0.0;
-    for(int i = 0; i < 5; i+=1) {
-        if (tabVal[i][0] != NULL)
-          s_longueurs += tabVal[i][0]->getValeur() * pow(10, tabVal[i][0]->getEchelle());
-        if (tabVal[i][1] != NULL)
-            s_poids += tabVal[i][1]->getValeur() * pow(10, tabVal[i][1]->getEchelle());
-        if (tabVal[i][2] != NULL){
-            if (tabVal[i][2]->getEchelle() == 3) {
-                s_temps += tabVal[i][2]->getValeur() * 3600 * 24;
-            } else if(tabVal[i][2]->getEchelle() == 2) {
-                s_temps += tabVal[i][2]->getValeur() * 3600;
-            } else if(tabVal[i][2]->getEchelle() == 1) {
-                s_temps += tabVal[i][2]->getValeur() * 60;
-            } else {
-                s_temps += tabVal[i][2]->getValeur() * pow(10, tabVal[i][2]->getEchelle());
+    if (table->selectedItems().size() == 0) {
+        for(int i = 0; i < rows; i+=1) {
+            if (tabVal[i][0] != NULL)
+              s_longueurs += tabVal[i][0]->getValeur() *
+                      pow(10, tabVal[i][0]->getEchelle());
+            if (tabVal[i][1] != NULL)
+                s_poids += tabVal[i][1]->getValeur() *
+                        pow(10, tabVal[i][1]->getEchelle());
+            if (tabVal[i][2] != NULL){
+                if (tabVal[i][2]->getEchelle() == 3) {
+                    s_temps += tabVal[i][2]->getValeur() * 3600 * 24;
+                } else if(tabVal[i][2]->getEchelle() == 2) {
+                    s_temps += tabVal[i][2]->getValeur() * 3600;
+                } else if(tabVal[i][2]->getEchelle() == 1) {
+                    s_temps += tabVal[i][2]->getValeur() * 60;
+                } else {
+                    s_temps += tabVal[i][2]->getValeur() *
+                            pow(10, tabVal[i][2]->getEchelle());
+                }
+            }
+        }
+    } else {
+        for(QTableWidgetItem *item : this->table->selectedItems()) {
+            if(item->column() == 0){
+                if (tabVal[item->row()][0] != NULL)
+                    s_longueurs += tabVal[item->row()][0]->getValeur() *
+                            pow(10, tabVal[item->row()][0]->getEchelle());
+            } else if(item->column() == 1){
+                if (tabVal[item->row()][1] != NULL)
+                    s_poids += tabVal[item->row()][1]->getValeur() *
+                            pow(10, tabVal[item->row()][1]->getEchelle());
+            } else if(item->column() == 2){
+                if (tabVal[item->row()][2]->getEchelle() == 3) {
+                    s_temps += tabVal[item->row()][2]->getValeur() * 3600 * 24;
+                } else if(tabVal[item->row()][2]->getEchelle() == 2) {
+                    s_temps += tabVal[item->row()][2]->getValeur() * 3600;
+                } else if(tabVal[item->row()][2]->getEchelle() == 1) {
+                    s_temps += tabVal[item->row()][2]->getValeur() * 60;
+                } else {
+                    s_temps += tabVal[item->row()][2]->getValeur() *
+                            pow(10, tabVal[item->row()][2]->getEchelle());
+                }
             }
         }
     }
@@ -190,8 +221,8 @@ void MaFenetre::total()
 void MaFenetre::effacer()
 {
     if (table->selectedItems().size() == 0) {
-        for(int r = 0; r < 5; r+=1){
-            for(int c = 0; c < 3; c+=1) {
+        for(int r = 0; r < rows; r+=1){
+            for(int c = 0; c < cols; c+=1) {
                 QTableWidgetItem *item;
                 item = new QTableWidgetItem();
                 table->setItem(r,c,item);
@@ -202,4 +233,5 @@ void MaFenetre::effacer()
             table->setItem(item->row(), item->column(), new QTableWidgetItem());
         }
     }
+    total();
 }

@@ -24,9 +24,10 @@ class MaFenetre : public QWidget
 {
     Q_OBJECT
 public:
-    MaFenetre();
+    MaFenetre(int rows, int cols);
 
 private:
+    int rows, cols;
     QVBoxLayout *main_layout;
     QHBoxLayout *button_layout;
     QHBoxLayout *content_layout;
@@ -56,7 +57,7 @@ private:
 
     QTableWidget *table;
 
-    Unite* tabVal[5][3];
+    Unite*** tabVal;
 
 public slots:
     void ajouter();
