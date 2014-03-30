@@ -57,6 +57,5 @@ QString Unite::toString() {
     default:
         break;
     }
-    std::cout << "Unite::toString\n";
     return QString::number(this->valeur) + " " + e;
 }

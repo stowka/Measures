@@ -56,7 +56,7 @@ private:
 
     QTableWidget *table;
 
-    Unite *tabVal[5][3];
+    Unite* tabVal[5][3];
 
 public slots:
     void ajouter();

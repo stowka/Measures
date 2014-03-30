@@ -27,10 +27,10 @@ QString Temps::toString() {
         e = "min";
         break;
     case 2:
-        e = "heure";
+        e = "h";
         break;
     case 3:
-        e = "jour";
+        e = "j";
         break;
     default:
         break;

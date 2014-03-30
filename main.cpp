@@ -2,6 +2,7 @@
 #include <iostream>
 #include <QApplication>
 #include <mafenetre.h>
+#include <longueur.h>
 
 using namespace std;
 

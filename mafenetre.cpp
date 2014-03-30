@@ -12,6 +12,11 @@
 MaFenetre::MaFenetre() : QWidget()
 {
     setFixedSize(1024, 768);
+    for(int i = 0; i < 5; i += 1){
+        for(int j = 0; j < 3; j += 1){
+            tabVal[i][j] = NULL;
+        }
+    }
     /*
      * Layouts
      */
@@ -130,47 +135,56 @@ void MaFenetre::ajouter()
     Unite* u;
     int unite = this->combo_unite->currentIndex();
     int ligne = this->combo_ligne->currentIndex();
-    int colonne = 0;
     switch (unite) {
     case 0:
         u = new Longueur();
+        u->setValeur(this->input_valeur->value());
+        u->setEchelle(this->input_echelle->value());
+        tabVal[ligne][unite] = u;
+        this->table->setItem(ligne, unite, new QTableWidgetItem(((Longueur*)u)->toString()));
         break;
     case 1:
         u = new Poids();
-        colonne = 1;
+        u->setValeur(this->input_valeur->value());
+        u->setEchelle(this->input_echelle->value());
+        tabVal[ligne][unite] = u;
+        this->table->setItem(ligne, unite, new QTableWidgetItem(((Poids*)u)->toString()));
         break;
     case 2:
         u = new Temps();
-        colonne = 2;
+        u->setValeur(this->input_valeur->value());
+        u->setEchelle(this->input_echelle->value());
+        tabVal[ligne][unite] = u;
+        this->table->setItem(ligne, unite, new QTableWidgetItem(((Temps*)u)->toString()));
         break;
     default:
         break;
     }
-    u->setValeur(this->input_valeur->value());
-    u->setEchelle(this->input_echelle->value());
-    tabVal[ligne][colonne] = u;
-    this->table->setItem(ligne, colonne, new QTableWidgetItem(u->toString()));
 }
 
 void MaFenetre::total()
 {
-
-    // CA BUG, probleme de tabVal je pense, pas le temps de regarder en détail
-
-
-//    int s_longueurs = 0, s_poids = 0, s_temps = 0;
-//    for(int i = 0; i < 5; i+=1) {
-//        if (tabVal[i][0] != NULL)
-//            s_longueurs += tabVal[i][0]->getValeur() * pow(10, tabVal[i][0]->getEchelle());
-//        if (tabVal[i][1] != NULL)
-//            s_poids += tabVal[i][1]->getValeur() * pow(10, tabVal[i][1]->getEchelle());
-//        // TODO temps
-//        if (tabVal[i][2] != NULL)
-//            s_temps += tabVal[i][2]->getValeur() * pow(60, tabVal[i][2]->getEchelle());
-//    }
-//    input_longueur->setText(QString::number(s_longueurs));
-//    input_poids->setText(QString::number(s_poids));
-//    input_temps->setText(QString::number(s_temps));
+    double s_longueurs = 0.0, s_poids = 0.0, s_temps = 0.0;
+    for(int i = 0; i < 5; i+=1) {
+        if (tabVal[i][0] != NULL)
+          s_longueurs += tabVal[i][0]->getValeur() * pow(10, tabVal[i][0]->getEchelle());
+        if (tabVal[i][1] != NULL)
+            s_poids += tabVal[i][1]->getValeur() * pow(10, tabVal[i][1]->getEchelle());
+        if (tabVal[i][2] != NULL){
+            if (tabVal[i][2]->getEchelle() == 3) {
+                s_temps += tabVal[i][2]->getValeur() * 3600 * 24;
+            } else if(tabVal[i][2]->getEchelle() == 2) {
+                s_temps += tabVal[i][2]->getValeur() * 3600;
+            } else if(tabVal[i][2]->getEchelle() == 1) {
+                s_temps += tabVal[i][2]->getValeur() * 60;
+            } else {
+                s_temps += tabVal[i][2]->getValeur() * pow(10, tabVal[i][2]->getEchelle());
+            }
+        }
+    }
+    input_longueur->setText(QString::number(s_longueurs) + " m");
+    input_poids->setText(QString::number(s_poids) + " g");
+    input_temps->setText(QString::number(s_temps) + " s");
 }
 
 void MaFenetre::effacer()
